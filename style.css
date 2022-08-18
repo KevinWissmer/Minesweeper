@@ -15,22 +15,26 @@ body{
 .singleField{
     height: 24px;
     width: 24px;
-    border: 1px solid black;
+    border: 2px solid gray;
     cursor: pointer;
 }
 
 .singleField:hover{
-    background-color: aqua;
+    border: 2px solid white;
 }
 
-.red_bg{
+.bomb_bg{
     background-color: red;
 }
 
-.green_bg{
+.empty_bg{
     background-color: green;
 }
 
-.yellow_bg{
+.bomb_near_bg{
     background-color: yellowgreen;
+}
+
+.flag{
+    background-color: blue;
 }

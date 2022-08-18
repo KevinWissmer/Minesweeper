@@ -11,7 +11,8 @@ function generateFieldsArray() {
                 'col': col,
                 'bomb': false,
                 'bombCount': 0,
-                'revealed': false
+                'revealed': false,
+                'flag' : false
             });
         }
     }
@@ -23,7 +24,7 @@ function fillFieldWBombs() {
         index = setSingelBomb();
         updateSurroundingFieldsBombcount(index);
     }
-    drawField();
+    drawFields();
 }
 
 function updateSurroundingFieldsBombcount(x, y) {
@@ -78,7 +79,7 @@ function setSingelBomb() {
 
 function init() {
     generateFieldsArray();
-    drawField();
+    drawFields();
 }
 
 function getRandomIndex() {
@@ -86,44 +87,69 @@ function getRandomIndex() {
     return x + 1;
 }
 
-function drawField() {
+function drawFields() {
     let fieldContainer = document.getElementById("field");
     fieldContainer.innerHTML = "";
-    for (let i = 0; i < fieldsize; i++) {
-        drawLine(i);
+    for (let row = 0; row < fieldsize; row++) {
+        createRow(row);
     }
 }
 
-function drawLine(lineNum) {
+function createRow(row) {
     let fieldContainer = document.getElementById("field");
-    fieldContainer.innerHTML += fullLineOpenTemplate(lineNum);
+    fieldContainer.innerHTML += fullLineOpenTemplate(row);
 }
 
-function fullLineOpenTemplate(lineNum) {
+function fullLineOpenTemplate(row) {
     let htmlCode = "";
-    for (let i = 0; i < fieldsize; i++) {
-        htmlCode += singleFieldOpenTemplate(lineNum, i);
+    for (let col = 0; col < fieldsize; col++) {
+        let index = getArrayIndex(row, col)
+        htmlCode += singleFieldOpenTemplate(index);
     }
-    return singleLineWrapperTemplate(htmlCode, lineNum)
+    return singleLineWrapperTemplate(htmlCode, row)
 }
 
-function singleFieldOpenTemplate(lineNum, fieldNum) {
-    return `<div onclick="checkField(${getArrayIndex(lineNum, fieldNum)})" id="field_${getArrayIndex(lineNum, fieldNum)}" class="singleField">${fields[((lineNum) * fieldsize) + fieldNum].bombCount}</div>`;
+function singleFieldOpenTemplate(index) {
+    return `<div oncontextmenu="setFlag(${index});return false;" onclick="checkField(${index})" id="field_${index}" class="singleField"></div>`;
 }
 
-function singleLineWrapperTemplate(content, lineNum) {
-    return `<div id="line_${lineNum}" class="singleFieldLine">${content}</div>`;
+function singleLineWrapperTemplate(content, row) {
+    return `<div id="line_${row}" class="singleFieldLine">${content}</div>`;
 }
 
 
 
-
-
+function setFlag(index){
+    if(!fields[index].revealed){
+        fields[index].flag = !fields[index].flag;
+        document.getElementById(`field_${index}`).classList.toggle('flag');
+    }
+}
 
 
 
 function checkField(index) {
-    console.log("checkField:", index);
+    switch (true) {
+        case fields[index].bombCount == 0:
+            checkAllFieldsAround(index);
+            break;
+        case fields[index].bomb:
+            toggleFieldBg(index, 'bomb', '');
+            gameLost();
+            break;
+        default:
+            toggleFieldBg(index, 'bomb_near', fields[index].bombCount);
+            break;
+    }
+    checkForWin();
+}
+
+function gameLost(){
+    document.getElementById('game_status').innerHTML ='game lost';
+    console.log('game lost');
+}
+
+function checkAllFieldsAround(index){
     for (let d_row = -1; d_row < 2; d_row++) {
         for (let d_col = -1; d_col < 2; d_col++) {
             let newIndex = getNewIndex(index, d_row, d_col);
@@ -140,14 +166,14 @@ function checkField(index) {
 function revealField(index) {
     switch (true) {
         case fields[index].bombCount == 0:
-            toggleFieldBg(index, 'green');
-            checkField(index);
+            toggleFieldBg(index, 'empty', '');
+            checkAllFieldsAround(index);
             break;
         case fields[index].bomb:
-            toggleFieldBg(index, 'red');
+            toggleFieldBg(index, 'bomb', '');
             break;
         default:
-            toggleFieldBg(index, 'yellow');
+            toggleFieldBg(index, 'bomb_near', fields[index].bombCount);
             break;
     }
     
@@ -158,7 +184,22 @@ function containsClass(index, classValue) {
 }
 
 
-function toggleFieldBg(index, color) {
+function toggleFieldBg(index, color, content) {
     fields[index].revealed = true;
-    document.getElementById(`field_${index}`).classList.add(`${color}_bg`);
+    let contentBox = document.getElementById(`field_${index}`);
+    contentBox.innerHTML = content;
+    contentBox.classList.add(`${color}_bg`);
+}
+
+function checkForWin(){
+    let won = true;
+    for (let index = 0; index < fields.length; index++) {
+        if(!fields[index].revealed && !fields[index].bomb){
+            won = false;  
+        } 
+    }
+    if(won) {
+        document.getElementById('game_status').innerHTML = "winner, winner, chicken dinner";
+        console.log("winner, winner, chicken dinner");
+    }
 }

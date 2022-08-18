@@ -1,0 +1,36 @@
+body{
+    margin: 0;
+}
+
+.field{
+    display: flex;
+    flex-direction: column;
+}
+
+.singleFieldLine{
+    display: flex;
+    flex-direction: row;
+}
+
+.singleField{
+    height: 24px;
+    width: 24px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.singleField:hover{
+    background-color: aqua;
+}
+
+.red_bg{
+    background-color: red;
+}
+
+.green_bg{
+    background-color: green;
+}
+
+.yellow_bg{
+    background-color: yellowgreen;
+}
